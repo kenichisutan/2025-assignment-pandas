@@ -34,14 +34,14 @@ def merge_regions_and_departments(regions, departments):
         right_on='code',
         how='inner'
     )
-    
+
     result = pd.DataFrame({
         'code_reg': merged['code'],
         'name_reg': merged['name_y'],
         'code_dep': merged['code_x'],
         'name_dep': merged['name_x']
     })
-    
+
     return result
 
 
@@ -59,10 +59,14 @@ def merge_referendum_and_areas(referendum, regions_and_departments):
         if code_str.isdigit():
             return code_str.zfill(2)
         return code_str
-    
-    referendum['Department code'] = referendum['Department code'].apply(format_code)
-    regions_and_departments['code_dep'] = regions_and_departments['code_dep'].astype(str)
-    
+
+    referendum['Department code'] = (
+        referendum['Department code'].apply(format_code)
+    )
+    regions_and_departments['code_dep'] = (
+        regions_and_departments['code_dep'].astype(str)
+    )
+
     merged = referendum.merge(
         regions_and_departments,
         left_on='Department code',
@@ -70,9 +74,9 @@ def merge_referendum_and_areas(referendum, regions_and_departments):
         how='inner'
     )
     merged = merged[~merged['code_dep'].str.contains('Z', na=False)]
-    
+
     merged = merged.dropna()
-    
+
     return merged
 
 
@@ -90,9 +94,9 @@ def compute_referendum_result_by_regions(referendum_and_areas):
         'Choice A': 'sum',
         'Choice B': 'sum'
     }).reset_index()
-    
+
     result = result.set_index('code_reg')
-    
+
     return result
 
 
@@ -107,7 +111,7 @@ def plot_referendum_map(referendum_result_by_regions):
     """
     gdf = gpd.read_file('data/regions.geojson')
     referendum_result_by_regions = referendum_result_by_regions.reset_index()
-    
+
     gdf = gdf.merge(
         referendum_result_by_regions,
         left_on='code',
@@ -115,9 +119,9 @@ def plot_referendum_map(referendum_result_by_regions):
         how='inner'
     )
     gdf['ratio'] = gdf['Choice A'] / (gdf['Choice A'] + gdf['Choice B'])
-    
+
     gdf.plot(column='ratio', legend=True, figsize=(10, 10))
-    
+
     return gdf
 
 
