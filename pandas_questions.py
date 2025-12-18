@@ -36,7 +36,7 @@ def merge_regions_and_departments(regions, departments):
     )
 
     result = pd.DataFrame({
-        'code_reg': merged['code'],
+        'code_reg': merged['code_y'],
         'name_reg': merged['name_y'],
         'code_dep': merged['code_x'],
         'name_dep': merged['name_x']
@@ -111,6 +111,11 @@ def plot_referendum_map(referendum_result_by_regions):
     """
     gdf = gpd.read_file('data/regions.geojson')
     referendum_result_by_regions = referendum_result_by_regions.reset_index()
+
+    referendum_result_by_regions['code_reg'] = (
+        referendum_result_by_regions['code_reg'].astype(str)
+    )
+    gdf['code'] = gdf['code'].astype(str)
 
     gdf = gdf.merge(
         referendum_result_by_regions,
